@@ -1,32 +1,43 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 
-function FileUpload({ setSummary, setFileName }) {
+const FileUpload = () => {
   const [file, setFile] = useState(null);
+  const [status, setStatus] = useState('');
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+    setStatus('');
+  };
 
   const handleUpload = async () => {
-    if (!file) return;
+    if (!file) return setStatus("No file selected.");
 
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      const res = await axios.post('http://localhost:5000/upload', formData);
-      setSummary(res.data.summary);
-      setFileName(res.data.fileName);
+      const res = await axios.post('http://localhost:5000/api/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      setStatus('✅ File uploaded successfully!');
+      console.log(res.data);
     } catch (err) {
       console.error(err);
-      alert('Upload failed');
+      setStatus('❌ Upload failed.');
     }
   };
 
   return (
-    <div className="card">
-      <h3>Upload a Document</h3>
-      <input type="file" onChange={(e) => setFile(e.target.files[0])} />
-      <button onClick={handleUpload}>Upload & Summarize</button>
+    <div>
+      <h2>Upload a File</h2>
+      <input type="file" onChange={handleFileChange} />
+      <button onClick={handleUpload}>Upload</button>
+      <p>{status}</p>
     </div>
   );
-}
+};
 
 export default FileUpload;

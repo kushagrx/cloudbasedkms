@@ -5,7 +5,7 @@ const Header = () => {
   return (
     <div style={styles.header}>
       <img src={icon} alt="Book Icon" style={styles.icon} />
-      <h1 style={styles.title}>Knowledge Management System</h1>
+      <h1 style={styles.title}>Cloud-based Knowledge Management System</h1>
     </div>
   );
 };
