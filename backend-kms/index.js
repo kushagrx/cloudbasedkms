@@ -1,47 +1,34 @@
 const express = require('express');
-const cors = require('cors');
 const multer = require('multer');
+const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const PORT = 5000;
+app.use(cors()); // allow frontend requests
 
-// Enable CORS
-app.use(cors());
-
-// Serve uploaded files statically
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
-// Setup multer for file uploads
+// Set storage engine for multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads/');
+    cb(null, 'uploads'); // Save in /uploads folder
   },
   filename: function (req, file, cb) {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
+    const uniqueName = `${Date.now()}-${file.originalname}`;
+    cb(null, uniqueName);
+  },
 });
+
 const upload = multer({ storage });
 
-// File upload endpoint
+// --- ROUTE to handle file upload ---
 app.post('/api/upload', upload.single('file'), (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No file uploaded' });
-    }
-
-    res.status(200).json({
-      success: true,
-      filename: req.file.originalname,
-      path: req.file.path,
-      message: 'File uploaded successfully',
-    });
-  } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ success: false, message: 'Server error' });
+  console.log(req.file); // Debugging
+  if (!req.file) {
+    return res.status(400).json({ error: 'No file uploaded' });
   }
+  res.json({ message: 'File uploaded successfully', file: req.file });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+// Start the server
+app.listen(5000, () => {
+  console.log('🚀 Server started on http://localhost:5000');
 });
