@@ -20,7 +20,7 @@ const UploadForm = () => {
     }
 
     const formData = new FormData();
-    formData.append('document', file);
+    formData.append("file", file);
 
     try {
       setLoading(true);

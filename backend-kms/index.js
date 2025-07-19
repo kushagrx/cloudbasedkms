@@ -4,20 +4,18 @@ const cors = require('cors');
 const path = require('path');
 
 const app = express();
-app.use(cors()); // allow frontend requests
+app.use(cors());
 
-// Set storage engine for multer
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'uploads'); // Save in /uploads folder
+    cb(null, "uploads/");
   },
   filename: function (req, file, cb) {
-    const uniqueName = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueName);
+    cb(null, Date.now() + "-" + file.originalname);
   },
 });
-
 const upload = multer({ storage });
+module.exports = upload;
 
 // --- ROUTE to handle file upload ---
 app.post('/api/upload', upload.single('file'), (req, res) => {
