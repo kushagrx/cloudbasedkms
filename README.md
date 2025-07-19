@@ -7,10 +7,10 @@ A full-stack web application that allows users to upload, view, and manage files
 ## 🧠 Features
 
 ### ✅ Core Functionalities
-- Upload and store files in the cloud
-- View a list of uploaded files with names and download links
-- Persistent file storage using MongoDB
-- Clean and responsive UI with React
+- 📤 Upload files to the backend using Multer
+- 🖼️ View uploaded files in the frontend
+- 🧩 Organized React component structure
+- 🔗 Backend–Frontend integration using REST API
 
 ### 🧪 Upcoming
 - AI-based file summarization
@@ -31,12 +31,11 @@ A full-stack web application that allows users to upload, view, and manage files
 ---
 
 ## 📁 Folder Structure
-
-project-root/
-├── backend-kms/ # Express + Multer backend
-│ ├── models/File.js
-│ ├── uploads/
-│ └── index.js
+```
+Cloud-KMS/
+├── backend-kms/ # Node.js + Express backend
+│ ├── uploads/ # Stored uploaded files
+│ ├── index.js # Main server file
 │
 ├── frontend-kms/ # React frontend
 │ ├── public/
@@ -49,7 +48,10 @@ project-root/
 │ │ │ └── Home.jsx
 │ │ └── App.js
 │ └── package.json
-
+│
+└── README.md
+```
 ## 👨‍💻 Author
 Kushagra Bisht
 🎓 B.Tech CSE, UPES Dehradun
+kushagrabisht10@gmail.com
