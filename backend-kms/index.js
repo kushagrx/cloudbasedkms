@@ -2,9 +2,19 @@ const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
+const File = require('./models/File');
+const fs = require('fs');
+
+
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost:27017/kms', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+}).then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection error:', err));
 
 const app = express();
-app.use(cors());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -17,16 +27,47 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 module.exports = upload;
 
-// --- ROUTE to handle file upload ---
-app.post('/api/upload', upload.single('file'), (req, res) => {
-  console.log(req.file); // Debugging
+
+app.post('/api/upload', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'No file uploaded' });
   }
-  res.json({ message: 'File uploaded successfully', file: req.file });
+
+  try {
+    const fileMeta = new File({
+      originalName: req.file.originalname,
+      storedName: req.file.filename,
+      path: req.file.path,
+      size: req.file.size
+    });
+
+    await fileMeta.save();
+
+    res.json({ message: '✅ File uploaded and saved to DB', file: req.file });
+  } catch (err) {
+    console.error('Error saving file to DB:', err);
+    res.status(500).json({ error: 'Failed to save file to DB' });
+  }
 });
 
-// Start the server
+
+app.get('/api/files', (req, res) => {
+  const uploadFolder = path.join(__dirname, 'uploads');
+  fs.readdir(uploadFolder, (err, files) => {
+    if (err) {
+      return res.status(500).json({ error: 'Unable to read files' });
+    }
+
+    const fileList = files.map(filename => ({
+      name: filename,
+      url: `http://localhost:5000/uploads/${filename}`,
+    }));
+
+    res.json(fileList);
+  });
+});
+
+
 app.listen(5000, () => {
   console.log('🚀 Server started on http://localhost:5000');
 });

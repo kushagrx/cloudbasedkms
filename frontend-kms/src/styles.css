@@ -43,3 +43,15 @@ button {
   border-radius: 4px;
   cursor: pointer;
 }
+
+ul {
+  list-style: none;
+  padding: 0;
+}
+li {
+  margin-bottom: 10px;
+}
+a {
+  text-decoration: none;
+  color: #1e88e5;
+}

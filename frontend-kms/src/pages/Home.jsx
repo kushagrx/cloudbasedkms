@@ -1,13 +1,28 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import Header from '../components/Header';
 import UploadForm from '../components/UploadForm';
+import UploadedFiles from '../components/UploadedFiles';
 
 const Home = () => {
+  const [files, setFiles] = useState([]);
+
+  const fetchFiles = () => {
+    axios.get('http://localhost:5000/files')
+      .then(response => setFiles(response.data))
+      .catch(error => console.error('Error fetching files:', error));
+  };
+
+  useEffect(() => {
+    fetchFiles();
+  }, []);
+
   return (
     <div style={styles.container}>
       <div style={styles.card}>
         <Header />
-        <UploadForm />
+        <UploadForm fetchFiles={fetchFiles} />
+        <UploadedFiles files={files} />
       </div>
     </div>
   );
