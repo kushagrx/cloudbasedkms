@@ -52,6 +52,6 @@ Cloud-KMS/
 └── README.md
 ```
 ## 👨‍💻 Author
-Kushagra Bisht
-🎓 B.Tech CSE, UPES Dehradun
+Kushagra Bisht <br>
+B.Tech CSE, UPES Dehradun <br>
 kushagrabisht10@gmail.com
