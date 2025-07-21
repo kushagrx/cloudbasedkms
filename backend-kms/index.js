@@ -14,7 +14,10 @@ mongoose.connect('mongodb://localhost:27017/kms', {
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
 const app = express();
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use(cors({
+  origin: 'http://localhost:3000',
+  credentials: true,
+}));
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {

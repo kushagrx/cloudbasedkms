@@ -21,8 +21,8 @@ const Home = () => {
     <div style={styles.container}>
       <div style={styles.card}>
         <Header />
-        <UploadForm fetchFiles={fetchFiles} />
-        <UploadedFiles files={files} />
+        <UploadForm onUploadSuccess={fetchFiles} />
+      <UploadedFiles files={files} />
       </div>
     </div>
   );
