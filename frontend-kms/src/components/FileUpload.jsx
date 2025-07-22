@@ -33,7 +33,10 @@ const FileUpload = () => {
   return (
     <div>
       <h2>Upload a File</h2>
-      <input type="file" onChange={handleFileChange} />
+      <input type="file" onChange={(e) => {
+        const file = e.target.files[0];
+        if (file) summarizeFile(file);
+      }}/>
       <button onClick={handleUpload}>Upload</button>
       <p>{status}</p>
     </div>

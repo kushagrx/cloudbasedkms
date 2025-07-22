@@ -14,34 +14,63 @@ const UploadForm = () => {
     setUploadedFiles([selectedFile]);
   };
 
+  const summarizeFile = async (file) => {
+  try {
+    // Read the file content as text
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const fileText = reader.result;
+
+      const res = await fetch('http://localhost:5000/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: fileText }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setSummary(data.summary);
+      } else {
+        setError(data.error || 'Failed to summarize.');
+      }
+    };
+
+    reader.onerror = () => {
+      setError('Error reading file.');
+    };
+
+    reader.readAsText(file);
+  } catch (err) {
+    setError('Server error during summarization.');
+  }
+};
+
   const handleSubmit = async () => {
-    if (!file) {
-      setError('⚠️ Please select a file first.');
-      return;
-    }
+    if (!file) return;
+
+    setLoading(true);
+    setError('');
+    setSummary('');
 
     const formData = new FormData();
     formData.append('file', file);
 
     try {
-      setLoading(true);
-      setError('');
-      setSummary('');
-
-      const response = await axios.post('http://localhost:5000/api/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+      const res = await fetch('http://localhost:5000/upload', {
+        method: 'POST',
+        body: formData,
       });
 
-      const result = response.data?.summary;
-      setSummary(result || '⚠️ No summary returned.');
-      setFile(null);
-      fetchUploadedFiles();
+      const data = await res.json();
+      if (res.ok) {
+        setUploadedFiles((prev) => [...prev, data.fileName]);
+        await summarizeFile(data.fileName); // ✅ now works because it's inside
+      } else {
+        setError(data.error || 'Upload failed.');
+      }
 
     } catch (err) {
-      console.error(err);
-      setError('❌ Something went wrong. Please try again.');
+      setError('Something went wrong');
     } finally {
       setLoading(false);
     }

@@ -1,10 +1,37 @@
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
-const path = require('path');
 const File = require('./models/File');
 const fs = require('fs');
+const path = require('path');
+const summarizeRoute = require("./routes/summarize");
+app.use("/summarize", summarizeRoute);
 
+
+app.post('/summarize', async (req, res) => {
+  const { fileName } = req.body;
+
+  if (!fileName) return res.status(400).json({ error: 'Missing filename' });
+
+  try {
+    const filePath = path.join(__dirname, 'uploads', fileName);
+    const content = fs.readFileSync(filePath, 'utf-8');
+
+    const prompt = `Summarize the following text in bullet points:\n\n${content}`;
+
+    const response = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: prompt }],
+    });
+
+    const summary = response.choices[0].message.content;
+    res.json({ summary });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Summarization failed' });
+  }
+});
 
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/kms', {
@@ -27,29 +54,46 @@ const storage = multer.diskStorage({
     cb(null, Date.now() + "-" + file.originalname);
   },
 });
+
 const upload = multer({ storage });
 module.exports = upload;
 
 
-app.post('/api/upload', upload.single('file'), async (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded' });
-  }
+app.post('/upload', upload.single('file'), async (req, res) => {
+  const file = req.file;
+
+  if (!file) return res.status(400).json({ error: 'No file uploaded' });
 
   try {
-    const fileMeta = new File({
-      originalName: req.file.originalname,
-      storedName: req.file.filename,
-      path: req.file.path,
-      size: req.file.size
+    // Read file content as text
+    const filePath = path.join(__dirname, 'uploads', file.filename);
+    const fileContent = fs.readFileSync(filePath, 'utf8');
+
+    // Summarize using OpenAI
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4', // or 'gpt-3.5-turbo'
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant that summarizes documents.' },
+        { role: 'user', content: `Please summarize this document:\n\n${fileContent}` },
+      ],
+      temperature: 0.5,
     });
 
-    await fileMeta.save();
+    const summary = response.choices[0].message.content;
 
-    res.json({ message: '✅ File uploaded and saved to DB', file: req.file });
-  } catch (err) {
-    console.error('Error saving file to DB:', err);
-    res.status(500).json({ error: 'Failed to save file to DB' });
+    // Return summary and uploaded file info
+    res.json({
+      message: 'File uploaded and summarized successfully',
+      summary,
+      uploadedFile: {
+        originalname: file.originalname,
+        filename: file.filename,
+      },
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to summarize the file' });
   }
 });
 
