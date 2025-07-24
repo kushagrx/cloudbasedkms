@@ -30,6 +30,36 @@ const FileUpload = () => {
     }
   };
 
+  const summarizeFile = async (file) => {
+  try {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const fileText = reader.result;
+
+      const res = await fetch('http://localhost:5000/summarize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: fileText }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        setSummary(data.summary);
+      } else {
+        setError(data.error || 'Failed to summarize.');
+      }
+    };
+
+    reader.onerror = () => {
+      setError('Error reading file.');
+    };
+
+    reader.readAsText(file);
+  } catch (err) {
+    setError('Server error during summarization.');
+  }
+};
+
   return (
     <div>
       <h2>Upload a File</h2>

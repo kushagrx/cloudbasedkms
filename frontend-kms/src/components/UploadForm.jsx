@@ -14,37 +14,6 @@ const UploadForm = () => {
     setUploadedFiles([selectedFile]);
   };
 
-  const summarizeFile = async (file) => {
-  try {
-    // Read the file content as text
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const fileText = reader.result;
-
-      const res = await fetch('http://localhost:5000/summarize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: fileText }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setSummary(data.summary);
-      } else {
-        setError(data.error || 'Failed to summarize.');
-      }
-    };
-
-    reader.onerror = () => {
-      setError('Error reading file.');
-    };
-
-    reader.readAsText(file);
-  } catch (err) {
-    setError('Server error during summarization.');
-  }
-};
-
   const handleSubmit = async () => {
     if (!file) return;
 
