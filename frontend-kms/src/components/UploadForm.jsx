@@ -31,13 +31,13 @@ const UploadForm = () => {
       });
 
       const data = await res.json();
+
       if (res.ok) {
         setUploadedFiles((prev) => [...prev, data.fileName]);
-        await summarizeFile(data.fileName); // ✅ now works because it's inside
+        setSummary(data.summary);  // summary comes from backend now
       } else {
         setError(data.error || 'Upload failed.');
       }
-
     } catch (err) {
       setError('Something went wrong');
     } finally {
@@ -58,50 +58,50 @@ const UploadForm = () => {
     fetchUploadedFiles();
   }, []);
 
-return (
-  <div style={styles.wrapper}>
-    <h2 style={styles.title}>Upload a Document</h2>
-    <input type="file" onChange={handleFileChange} />
-    <button style={styles.button} onClick={handleSubmit} disabled={loading}>
-      {loading ? 'Summarizing...' : 'Upload & Summarize'}
-    </button>
+  return (
+    <div style={styles.wrapper}>
+      <h2 style={styles.title}>Upload a Document</h2>
+      <input type="file" onChange={handleFileChange} />
+      <button style={styles.button} onClick={handleSubmit} disabled={loading}>
+        {loading ? 'Summarizing...' : 'Upload & Summarize'}
+      </button>
 
-    {error && <p style={styles.error}>{error}</p>}
+      {error && <p style={styles.error}>{error}</p>}
 
-    {summary && (
-      <div style={styles.resultBox}>
-        <h3>Summary:</h3>
-        <p>{summary}</p>
-      </div>
-    )}
+      {summary && (
+        <div style={styles.resultBox}>
+          <h3>Summary:</h3>
+          <p>{summary}</p>
+        </div>
+      )}
 
-    {uploadedFiles.length > 0 && (
-      <div style={styles.resultBox}>
-        <h3>Uploaded Files:</h3>
-        <ul>
-          {uploadedFiles.map((file, index) => {
-            const fileName = typeof file === 'string'
-              ? file
-              : file.originalname || file.name || `File ${index + 1}`;
+      {uploadedFiles.length > 0 && (
+        <div style={styles.resultBox}>
+          <h3>Uploaded Files:</h3>
+          <ul>
+            {uploadedFiles.map((file, index) => {
+              const fileName =
+                typeof file === 'string'
+                  ? file
+                  : file.originalname || file.name || `File ${index + 1}`;
 
-            return (
-              <li key={index}>
-                <a
-                  href={`http://localhost:5000/uploads/${fileName}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {fileName}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    )}
-  </div>
-);
-
+              return (
+                <li key={index}>
+                  <a
+                    href={`http://localhost:5000/uploads/${fileName}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {fileName}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
 };
 
 const styles = {
@@ -129,12 +129,12 @@ const styles = {
     backgroundColor: '#ffffff',
     padding: 15,
     borderRadius: 10,
-    boxShadow: '0 2px 6px rgba(0,0,0,0.1)'
+    boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
   },
   error: {
     color: 'red',
     marginTop: 10,
-  }
+  },
 };
 
 export default UploadForm;
