@@ -25,7 +25,6 @@ router.post("/", (req, res) => {
     }
   });
 
-  // send input to python script
   python.stdin.write(JSON.stringify({ text }));
   python.stdin.end();
 });

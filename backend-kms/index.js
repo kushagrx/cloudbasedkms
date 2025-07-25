@@ -70,7 +70,7 @@ function summarizeTextWithPython(text) {
 app.post('/upload', upload.single('file'), async (req, res) => {
   try {
     const fileContent = fs.readFileSync(req.file.path, 'utf8');
-    const summary = await summarizeTextWithPython(fileContent); // Call Python summarizer
+    const summary = await summarizeTextWithPython(fileContent);
     res.json({ fileName: req.file.filename, summary });
   } catch (err) {
     console.error("Failed to upload or summarize file:", err);
