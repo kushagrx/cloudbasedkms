@@ -5,7 +5,6 @@ import sys
 import json
 
 def chunk_text(text, chunk_size=900):
-    # Chunks by character length — for sentences, use nltk
     return [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
 
 if len(sys.argv) > 1:
@@ -23,17 +22,20 @@ if not text.strip():
 
 summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
 
-# If text is long, summarize in chunks, then summarize those summaries
-max_chunk = 900     # About 1024 tokens for this model
+max_chunk = 900
 if len(text) > max_chunk:
     chunks = chunk_text(text, max_chunk)
     summaries = []
     for chunk in chunks:
         s = summarizer(chunk, max_length=60, min_length=15, do_sample=False)[0]['summary_text']
         summaries.append(s)
-    # Combine all summaries and summarize again
-    final_summary = summarizer(" ".join(summaries), max_length=80, min_length=35, do_sample=False)[0]['summary_text']
+    combined = " ".join(summaries)
+    # Prompt the model to return bullet points
+    bullet_prompt = f"Summarize the following as bullet points:\n{combined}"
+    final_summary = summarizer(bullet_prompt, max_length=80, min_length=35, do_sample=False)[0]['summary_text']
     print(json.dumps({"summary": final_summary}))
 else:
-    summary = summarizer(text, max_length=60, min_length=15, do_sample=False)[0]['summary_text']
+    # For short texts, use bullet prompt directly
+    bullet_prompt = f"Summarize the following as bullet points:\n{text}"
+    summary = summarizer(bullet_prompt, max_length=60, min_length=15, do_sample=False)[0]['summary_text']
     print(json.dumps({"summary": summary}))
